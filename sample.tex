@@ -1,0 +1,50 @@
+\documentclass{book}
+\usepackage{kantlipsum}
+\usepackage{commedit}
+\clearpage
+\begin{commeditPreamble}{commented.tex}
+  \documentclass{book}
+  \usepackage{kantlipsum}
+\end{commeditPreamble}
+
+\begin{commeditText}
+  \frontmatter
+  \title{Commented edition}
+  \author{Boris Veytsman}
+  \date{November 2018}
+  \maketitle
+  
+\section{Introduction}
+\label{sec:intro}
+
+\kant[6]
+
+\mainmatter
+\end{commeditText}
+
+\begin{document}
+\frontmatter
+\title{Base edition}
+\author{Boris Veytsman}
+\date{November 2018}
+
+\kant
+
+\mainmatter
+\begin{commeditComments}
+  \kant[6]
+\end{commeditComments}
+
+\kant[6]
+
+\begin{commeditText}
+  \kant[11]
+\end{commeditText}
+
+\begin{commeditComments}
+  \kant[2]
+\end{commeditComments}
+
+\kant[12]
+
+\end{document}

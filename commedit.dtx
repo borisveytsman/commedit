@@ -1,0 +1,513 @@
+% \iffalse
+%
+%% Copyright 2018, Boris Veytsman <borisv@lk.net>
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3 of this license or (at your option) any 
+%% later version.
+%% The latest version of the license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2003/06/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The Current Maintainer of this work is Boris Veytsman
+%%
+%    \begin{macrocode}
+%<style>\NeedsTeXFormat{LaTeX2e}
+%<*gobble>
+\ProvidesFile{commedit.dtx}
+%</gobble>
+%<style>\ProvidesPackage{commedit}
+%<*style>
+[2018/11/23 v0.01 Commented editions with LaTeX]
+%    \end{macrocode}
+%</style>
+%<*gobble>
+% \fi
+% \CheckSum{0}
+%
+%
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~} 
+%
+%\iffalse
+%    \begin{macrocode}
+\documentclass{ltxdoc}
+\usepackage{hypdoc}
+\usepackage{tikz}
+\PageIndex
+\CodelineIndex
+\RecordChanges
+\EnableCrossrefs
+\begin{document}
+  \DocInput{commedit.dtx}
+\end{document}
+%    \end{macrocode}
+%</gobble> 
+% \fi
+% \MakeShortVerb{|}
+% \GetFileInfo{commedit.dtx}
+% 
+% 
+% \title{Creating commented editions\thanks{\copyright 2018 Boris Veytsman}
+% \thanks{This package was commissined by Instituto de Matem\'atica
+% Pura e Aplicada, \url{https://impa.br}}} 
+% \author{Boris Veytsman \thanks{borisv@lk.net}}
+% \date{\filedate, \fileversion}
+% \maketitle
+%
+% \begin{abstract}
+%   The \textsl{commedit} package is intended to typeset commented editions.
+% \end{abstract}
+%
+% \tableofcontents
+%
+% \clearpage
+%
+%\section{Introduction}
+%\label{sec:intro}
+%
+% This package is intended for commented editions.  An example of
+% commented edition is a teacher's book based on a student's
+% textbook.  Each page of a teacher's book is a page from the textbook
+% \emph{and} comments for the teacher.
+%
+% \begin{figure}
+%   \centering
+%   \begin{tikzpicture}
+%     \draw (0,0) rectangle node {Comments} (2,8);
+%     \draw (2.2, 2) rectangle node {Base page} (6.4, 8);
+%     \draw (2.2, 0) rectangle node {Comments} (4.2, 1.8);
+%     \draw (4.4, 0) rectangle node {Comments} (6.4, 1.8);
+%   \end{tikzpicture}
+%   \caption{A page of a commented edition.  This page has one
+%   ``tall'' and two ``short'' columns.}
+%   \label{fig:commented_edition}
+% \end{figure}
+%
+% The aim is to have a single source for two books: the ``base''
+% edition and the commented edition, which reproduces the pages from
+% the base one and adds comments around it (see
+% Figure~\ref{fig:commented_edition}).  In fact, commented edition can
+% have both base pages with comments, and ``normal'' pages with free
+% text. 
+%
+% The implementation of this idea is the following.  We insert into
+% the base  file comments in the form
+% \begin{verbatim}
+% \begin{commeditComments}
+%   ...
+% \end{commeditComments}
+% \end{verbatim}
+%
+% Processing the base source gives us the base PDF file \emph{and} the
+% commented edition \path{.tex} file.  Processing the latter gives us
+% the commented edition.
+%
+% During the processing the base PDF file must be present,
+% since the commented edition uses it to extract the pages to include
+% into the output.  You also need the base AUX file to process the
+% labels in the base documents.
+%
+%
+%\section{User manual}
+%\label{sec:user_manual}
+%
+%
+%\subsection{Document structure}
+%\label{sec:ug_structure}
+%
+%
+%
+% \begin{figure}
+%   \centering
+% \begin{verbatim}
+% \documentclass...  % Document class for the main edition
+% ...
+% \usepackage{commedit}
+% \begin{commeditPreamble}{filename}
+%   \documentclass...  % Document class for the main edition
+%   \usepackage{commedit}
+%   Preamble for commented edition
+% \end{commeditPreamble}
+% ...
+% \begin{document}
+% 
+% \begin{commeditText}
+%   Text for the commented edition
+% \end{commeditText}
+%
+% Base text
+% Base text
+% ...
+% \begin{commeditComments}
+%   Comments text
+% \end{commeditComments}
+% Base text
+% ....
+% \begin{commeditComments}
+%   Comments text
+% \end{commeditComments}
+% Base text
+% ....
+% \begin{comments}
+%   Comments text
+% \end{comments}
+% Base text
+% ....
+% \begin{commeditText}
+%   Text for the commented edition
+% \end{commeditText}
+% Base test
+% \end{document}
+% \end{verbatim}
+%   \caption{Structure of the main source file}
+%   \label{fig:source}
+% \end{figure}
+%
+% The structure of the main source file is shown on
+% Figure~\ref{fig:source}.  It has three kinds of special
+% environments:
+% \begin{enumerate}
+% \item Exactly one  \texttt{commeditPreamble}
+% environment in the preamble.
+% \item Zero or more \texttt{commeditText} environments anywhere
+% \emph{after} \texttt{commeditPreamble}. 
+% \item Zero or more \texttt{commeditComments} environments anywhere
+% \emph{after} \texttt{commeditPreamble}. 
+% \end{enumerate}
+% Below we discuss there environments in detail.
+%
+%
+%\subsection{Setting up commenting edition}
+%\label{sec:ug_setup}
+%
+%
+%
+% \DescribeEnv{commeditPreamble}%
+% The environment \cs{begin\{commeditPreamble\}}\marg{filename} \ldots
+% \cs{end\{commeditPreamble\}} must be present in the preamble of the
+% base document.  It has one mandatory argument, the name of the
+% commented edition file.  The contents of the environment are written
+% as the preamble of the file \path{filename.tex}, so they must start
+% with \cs{documentclass}, which might be different from the document
+% class of the base edition.  \texttt{commeditPreamble} may add
+% additional packages.  Note that commented edition reads the
+% \texttt{.aux} file of the base edition.  Since packages like
+% \textsl{babel} or \textsl{hyperref} change the format of this file,
+% their usage must be the same in the base and commented edition:
+% either both editions use such package, or both do not use it.  
+%
+% The following commands are recognized in this environment.
+%
+% \DescribeMacro{\basepagewidth}%
+% \DescribeMacro{\basepageheight}%
+% The desired width and height of the base pages are stored in the
+% lengths \cs{basewidth} and \cs{baseheight}.  Setting them to 
+% negative values (the default) means using the natural dimensions of
+% the base pages.
+%
+% \DescribeMacro{\basepageskip}%
+% The length \cs{basepageskip} is the distance between the base page
+% and the columns of the comments under it.  By default 6\,mm.
+%
+% \DescribeMacro{\commentscolskip}%
+% The length \cs{commentscolskip} is the distance between comment
+% columns.  By default 6\,mm.
+%
+% \DescribeMacro{\commentscolwidth}%
+% The length \cs{commentscolwidth} is the width of the comment
+% columns.  By default 55.5\,mm. 
+%
+%
+% \DescribeMacro{\commentscolTheight}%
+% \DescribeMacro{\commentscolSheight}%
+% The lengths \cs{commentscolTheight} and \cs{commentscolSheight} are
+% the heights of ``tall'' and ``short'' comment columns (see
+% Figre~\ref{fig:commented_edition}.  By default 256\,mm and 56\,mm.
+%
+%
+% \DescribeMacro{\commentsOddPageSetup}%
+% \DescribeMacro{\commentsEvenPageSetup}%
+% The setup of the pages is set by the macros
+% \cs{commentsOddPageSetup}\marg{Number of left tall
+% columns}\marg{Number of short columns}\marg{Number of right tall
+% columns} and \cs{commentsEvenPageSetup}\marg{Number of left tall
+% columns}\marg{Number of short columns}\marg{Number of right tall
+% columns}.  The defaults are
+% \begin{verbatim}
+% \commentsOddPageSetup{0}{2}{1}
+% \commentsEvenPageSetup{1}{2}{0}
+% \end{verbatim}
+%
+% \DescribeMacro{\commentsParindent}%
+% \DescribeMacro{\commentsParskip}%
+% Paragraph indent and paragraph skip for the comments.  By default
+% 1\,em and zero correspondingly.
+%
+% \DescribeMacro{\commentsHook}%
+% A hook executed for all comments pages.  Do not use it unless you
+% know what you are doing.  If the following makes sense  to you, you
+% may use this command:
+% \begin{verbatim}
+% \def\commentsHook{\small\normalfont}
+% \end{verbatim}
+% 
+%
+% The environemnt must \emph{not} include the \cs{begin{document}}
+% line since it is added, along with some technical stuff, by the
+% package itself.
+%
+%\subsection{Commented pages}
+%\label{sec:ug_commeditComments}
+%
+% \DescribeEnv{commeditComments}%
+% The enivronment \texttt{commeditComments} sets up comments for the
+% page of the base edition.  There could be several such environments
+% on the given base edition page---actually, since in \TeX\ pagination
+% is done algorithmically, one cannot determine beforehand how many of
+% them are there.
+%
+%
+%\subsection{Normal pages}
+%\label{sec:ug_commeditText}
+%
+% \DescribeEnv{commeditText}%
+% Normal pages in the commented edition are set up with the
+% environment \texttt{commeditText}.  Note that setting up normal
+% pages can begin only if the comments for the current page are
+% flushed.  Therefore \texttt{commeditText} inserts \cs{clearpage}
+% into the base edition.  
+%
+%
+%\StopEventually{\clearpage}
+%
+% \clearpage
+% 
+% \section{Implementation}
+% \label{sec:implementation}
+%    \begin{macrocode}
+%<*style>
+%    \end{macrocode}
+%
+%
+%\subsection{Base file commands}
+%\label{sec:base}
+%
+% \begin{macro}{\ifCommentedEdition}
+%   Whether this is a base or commented edition.
+%    \begin{macrocode}
+\newif\ifCommentedEdition
+\CommentedEditionfalse
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\@commeditout}
+%   The file to write the the data to
+%    \begin{macrocode}
+\newwrite\@commeditout
+\AtEndDocument{\ifCommentedEdition\else
+  \write\@commeditout{\string\end{commentsPage}}%
+  \write\@commeditout{\string\end{document}}%
+\fi
+\closeout\@commeditout}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+%
+% \begin{macro}{\@write@comments}
+%   The workhorse.  Mainly from Scott Pakin's \texttt{filecontents}
+%   package and \LaTeX\ kernel.  The commments are from them.
+%    \begin{macrocode}
+\begingroup%
+\@tempcnta=1
+\loop
+  \catcode\@tempcnta=12  %
+  \advance\@tempcnta\@ne %
+\ifnum\@tempcnta<32      %
+\repeat                  %
+\catcode`\*=11 %
+\catcode`\^^M\active%
+\catcode`\^^L\active\let^^L\relax%
+\catcode`\^^I\active%
+\gdef\@write@comments{%
+  \let\do\@makeother\dospecials%
+%    \end{macrocode}
+%    If there are active characters in the upper half (e.g., from
+%    \texttt{inputenc} there would be confusion so we render everything
+%    harmless.
+%    \begin{macrocode}
+  \count@ 128\relax%
+  \loop%
+    \catcode\count@ 11\relax%
+    \advance\count@ \@ne%
+    \ifnum\count@<\@cclvi%
+  \repeat%
+  \edef\E{\@backslashchar end\string{\@currenvir\string}}%
+  \edef\reserved@b{%
+    \def\noexpand\reserved@b%
+         ####1\E####2\E####3\relax}%
+  \reserved@b{%
+    \ifx\relax##3\relax%
+%    \end{macrocode}
+% There was no |\end{filecontents}|
+%    \begin{macrocode}
+      \immediate\write\@commeditout{##1}%
+    \else%
+%    \end{macrocode}
+% There was a |\end{filecontents}|, so stop this time.
+%    \begin{macrocode}
+      \edef^^M{\noexpand\end{\@currenvir}}%
+      \ifx\relax##1\relax%
+      \else%
+%    \end{macrocode}
+% Text before the |\end|, write it with a warning.
+%    \begin{macrocode}
+          \@latex@warning{Writing text `##1' before %
+             \string\end{\@currenvir}\MessageBreak as last line of \@currenvir}%
+        \immediate\write\@commeditout{##1}%
+      \fi%
+      \ifx\relax##2\relax%
+      \else%
+%    \end{macrocode}
+% Text after the |\end|, ignore it with a warning.
+%    \begin{macrocode}
+         \@latex@warning{%
+           Ignoring text `##2' after \string\end{\@currenvir}}%
+      \fi%
+    \fi%
+    ^^M}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+  \catcode`\^^L\active%
+  \let\L\@undefined%
+  \def^^L{\@ifundefined L^^J^^J^^J}%
+  \catcode`\^^I\active%
+  \let\I\@undefined%
+  \def^^I{\@ifundefined I\space\space}%
+  \catcode`\^^M\active%
+  \edef^^M##1^^M{%
+    \noexpand\reserved@b##1\E\E\relax}}%
+\endgroup%
+%    \end{macrocode}
+%
+%   
+% \end{macro}
+%
+% \begin{macro}{\commeditPreamble}
+%   Writing the preamble
+%    \begin{macrocode}
+\def\commeditPreamble#1{\immediate\closeout\@commeditout
+  \immediate\openout\@commeditout=#1
+  \@write@comments}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\endcommeditPreamble}
+%   Close the preamble
+%    \begin{macrocode}
+\def\endcommeditPreamble{%
+  \immediate\write\@commeditout{\string\usepackage{commedit}}%
+  \immediate\write\@commeditout{\string\CommentedEditiontrue}%
+  \immediate\write\@commeditout{\string\def\string\BaseEditionName{\jobname}}%
+  \immediate\write\@commeditout{\string\usepackage{graphicx}}%
+  \immediate\write\@commeditout{\string\begin{document}}%
+  \immediate\write\@commeditout{\string\begin{commentsPage}}}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+%
+% \begin{macro}{\commeditComments}
+%   The main environment
+%    \begin{macrocode}
+\def\commeditComments{\@write@comments}      
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+%
+% \begin{macro}{\endcommeditComments}
+%  We add \cs{par} at the end of each comments
+%    \begin{macrocode}
+\def\endcommeditComments{%
+  \immediate\write\@commeditout{\string\par}}
+%    \end{macrocode}
+%  
+%   
+% \end{macro}
+%
+% \begin{macro}{\commeditText}
+%   Normal pages.  We issue \cs{clearpage}, which might close the
+%   current comments and open the new one, close the just opened
+%   comments, typeset the text in the commented edition and reopen the
+%   comments. 
+%    \begin{macrocode}
+\def\commeditText{\clearpage
+  \immediate\write\@commeditout{\string\end{commentsPage}}%
+\@write@comments}      
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\endcommeditText}
+%   Opening the new comments page
+%    \begin{macrocode}
+\def\endcommeditText{%
+  \immediate\write\@commeditout{\string\par}%
+    \immediate\write\@commeditout{\string\begin{commentsPage}}}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commedit@base@pageno}
+%   The true page number of the current page
+%    \begin{macrocode}
+\newcount\@commedit@base@pageno
+\@commedit@base@pageno=1\relax
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% We write the commands to every shipout
+%    \begin{macrocode}
+\RequirePackage{atbegshi}
+\AtBeginShipout{\ifCommentedEdition\else
+  \immediate\write\@commeditout{\string\end{commentsPage}}%
+\immediate\write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
+\global\advance\@commedit@base@pageno by 1\relax
+\immediate\write\@commeditout{\string\begin{commentsPage}}%
+  \fi}
+%    \end{macrocode}
+% 
+%
+%    \begin{macrocode}
+%</style>
+%    \end{macrocode}
+%\Finale
+%\clearpage
+%
+%\PrintChanges
+%\clearpage
+%\PrintIndex
+%
+\endinput
