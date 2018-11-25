@@ -215,16 +215,7 @@
 %
 % The following commands are recognized in this environment.
 %
-% \DescribeMacro{\basepagewidth}%
-% \DescribeMacro{\basepageheight}%
-% The desired width and height of the base pages are stored in the
-% lengths \cs{basewidth} and \cs{baseheight}.  Setting them to 
-% negative values (the default) means using the natural dimensions of
-% the base pages.
 %
-% \DescribeMacro{\basepageskip}%
-% The length \cs{basepageskip} is the distance between the base page
-% and the columns of the comments under it.  By default 6\,mm.
 %
 % \DescribeMacro{\commentscolskip}%
 % The length \cs{commentscolskip} is the distance between comment
@@ -241,6 +232,19 @@
 % the heights of ``tall'' and ``short'' comment columns (see
 % Figre~\ref{fig:commented_edition}.  By default 256\,mm and 56\,mm.
 %
+% \DescribeMacro{\basepageboxwidth}%
+% The width of the box with the base page is \cs{basepageboxwidth}.
+% The height of the box is \cs{commentscolTheight}.  The base page is
+% aligned with the top left point of this box.  By default 153\,mm.
+%
+% \DescribeMacro{\basepageargs}%
+% The base pages are included with \cs{includegraphics} command.
+% \cs{basepageargs} can be used to set up arguments of this command,
+% for example, if you want to scale the pages,
+% \begin{verbatim}
+% \basepageargs{width=153 mm, height=100mm}
+% \end{verbatim}
+% 
 %
 % \DescribeMacro{\commentsOddPageSetup}%
 % \DescribeMacro{\commentsEvenPageSetup}%
@@ -255,17 +259,11 @@
 % \commentsEvenPageSetup{1}{2}{0}
 % \end{verbatim}
 %
-% \DescribeMacro{\commentsParindent}%
-% \DescribeMacro{\commentsParskip}%
-% Paragraph indent and paragraph skip for the comments.  By default
-% 1\,em and zero correspondingly.
 %
 % \DescribeMacro{\commentsHook}%
-% A hook executed for all comments pages.  Do not use it unless you
-% know what you are doing.  If the following makes sense  to you, you
-% may use this command:
+% A hook executed for all comments pages, for example
 % \begin{verbatim}
-% \def\commentsHook{\small\normalfont}
+% \commentsHook{\small\normalfont}
 % \end{verbatim}
 % 
 %
@@ -514,35 +512,13 @@
 %    \begin{macrocode}
 \RequirePackage{etoolbox}
 \AtEndPreamble{\ifCommentedEdition
-  \@input{\BaseEditionName.aux}\fi}
+    \begingroup\@floatplacement\@dblfloatplacement
+    \makeatletter\let\@writefile\@gobbletwo
+    \global \let \@multiplelabels \relax
+    \@input{\BaseEditionName.aux}\endgroup
+    \fi}
 %    \end{macrocode}
 %
-% \begin{macro}{\basepagewidth}
-%   The width of the base page
-%    \begin{macrocode}
-\newlength\basepagewidth
-\setlength\basepagewidth{-1pt}
-%    \end{macrocode}
-%   
-% \end{macro}
-%
-% \begin{macro}{\basepageheight}
-%   The height of the base page
-%    \begin{macrocode}
-\newlength\basepageheight
-\setlength\basepageheight{-1pt}
-%    \end{macrocode}
-%   
-% \end{macro}
-%
-% \begin{macro}{\basepageskip}
-%   The skip between the base page and comments underneath it
-%    \begin{macrocode}
-\newlength\basepageskip
-\setlength\basepageskip{6mm}
-%    \end{macrocode}
-%   
-% \end{macro}
 %
 % \begin{macro}{\commentscolskip}
 %   The distance between columns
@@ -566,7 +542,7 @@
 %   The height of the ``tall'' columns
 %    \begin{macrocode}
 \newlength\commentscolTheight
-\setlength\commentscolTheight{25.6mm}
+\setlength\commentscolTheight{256mm}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -577,6 +553,25 @@
 \newlength\commentscolSheight
 \setlength\commentscolSheight{56mm}
 %    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\basepageboxwidth}
+%   The width of the base page box
+%    \begin{macrocode}
+\newlength\basepageboxwidth
+\setlength\basepageboxwidth{153mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\basepageargs}
+% Arguments for \cs{includegraphics}
+%    \begin{macrocode}
+\def\basepageargs#1{\gdef\@basepageargs{#1}}
+\basepageargs{}
+%    \end{macrocode}
+% 
 %   
 % \end{macro}
 %
@@ -604,28 +599,11 @@
 %   
 % \end{macro}
 %
-% \begin{macro}{\commentsParindent}
-%   The paragraphing for comments
-%    \begin{macrocode}
-\newlength\commentsParindent
-\setlength\commentsParindent{\parindent}
-%    \end{macrocode}
-%   
-% \end{macro}
-%
-% \begin{macro}{\commentsParskip}
-%   The paragraphing for comments continued
-%    \begin{macrocode}
-\newlength\commentsParskip
-\setlength\commentsParskip{\parskip}
-%    \end{macrocode}
-%   
-% \end{macro}
-%
 % \begin{macro}{\commentsHook}
 %   Everything we did not think about\ldots
 %    \begin{macrocode}
-\def\commentsHook{}
+\def\commentsHook#1{\gdef\@commentsHook{#1}}
+\commentsHook{}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -648,9 +626,7 @@
 %    \begin{macrocode}
 \def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vtop\bgroup
   \normalsize\normalfont
-  \parindent=\commentsParindent
-  \parskip\commentsParskip
-  \commentsHook}
+  \@commentsHook}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -696,8 +672,8 @@
        \advance\@tempcnta by -1\relax
        \ifnum\@tempcnta>0\repeat      
   \fi
-  \box\@commedit@pagebox
-  \egroup}
+  \noindent\box\@commedit@pagebox\par
+  \egroup\vfill\clearpage}
 %    \end{macrocode}
 %   
 % \end{macro}
