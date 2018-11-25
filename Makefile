@@ -10,7 +10,7 @@ PACKAGE=commedit
 
 SAMPLESTEX = sample.tex
 
-SAMPLESPDF = ${SAMPLESTEX:%.tex=%.pdf} 
+SAMPLESPDF = ${SAMPLESTEX:%.tex=%.pdf} commented.pdf
 
 all:  $(PACKAGE).pdf $(SAMPLESPDF)
 

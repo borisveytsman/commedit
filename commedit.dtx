@@ -323,7 +323,7 @@
 %    \begin{macrocode}
 \newwrite\@commeditout
 \AtEndDocument{\ifCommentedEdition\else
-  \write\@commeditout{\string\end{commentsPage}}%
+  \write\@commeditout{\string\end{commentsBox}}%
   \write\@commeditout{\string\end{document}}%
 \fi
 \closeout\@commeditout}
@@ -430,8 +430,9 @@
   \immediate\write\@commeditout{\string\CommentedEditiontrue}%
   \immediate\write\@commeditout{\string\def\string\BaseEditionName{\jobname}}%
   \immediate\write\@commeditout{\string\usepackage{graphicx}}%
+  \immediate\write\@commeditout{\string\usepackage[strict]{changepage}}%
   \immediate\write\@commeditout{\string\begin{document}}%
-  \immediate\write\@commeditout{\string\begin{commentsPage}}}
+  \immediate\write\@commeditout{\string\begin{commentsBox}}}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -463,7 +464,7 @@
 %   comments. 
 %    \begin{macrocode}
 \def\commeditText{\clearpage
-  \immediate\write\@commeditout{\string\end{commentsPage}}%
+  \immediate\write\@commeditout{\string\end{commentsBox}}%
 \@write@comments}      
 %    \end{macrocode}
 %   
@@ -474,7 +475,7 @@
 %    \begin{macrocode}
 \def\endcommeditText{%
   \immediate\write\@commeditout{\string\par}%
-    \immediate\write\@commeditout{\string\begin{commentsPage}}}
+    \immediate\write\@commeditout{\string\begin{commentsBox}}}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -492,13 +493,214 @@
 %    \begin{macrocode}
 \RequirePackage{atbegshi}
 \AtBeginShipout{\ifCommentedEdition\else
-  \immediate\write\@commeditout{\string\end{commentsPage}}%
+  \immediate\write\@commeditout{\string\end{commentsBox}}%
 \immediate\write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
 \global\advance\@commedit@base@pageno by 1\relax
-\immediate\write\@commeditout{\string\begin{commentsPage}}%
+\immediate\write\@commeditout{\string\begin{commentsBox}}%
   \fi}
 %    \end{macrocode}
+%
+%
+%
+%\subsection{Typesetting commented edition}
+%\label{sec:commentedEdition}
+%
+%
+%
+%\subsubsection{Setting things up}
+%\label{sec:setup_commented_edition}
+%
+% We need to read the aux file for the base edition
+%    \begin{macrocode}
+\RequirePackage{etoolbox}
+\AtEndPreamble{\ifCommentedEdition
+  \@input{\BaseEditionName.aux}\fi}
+%    \end{macrocode}
+%
+% \begin{macro}{\basepagewidth}
+%   The width of the base page
+%    \begin{macrocode}
+\newlength\basepagewidth
+\setlength\basepagewidth{-1pt}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\basepageheight}
+%   The height of the base page
+%    \begin{macrocode}
+\newlength\basepageheight
+\setlength\basepageheight{-1pt}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\basepageskip}
+%   The skip between the base page and comments underneath it
+%    \begin{macrocode}
+\newlength\basepageskip
+\setlength\basepageskip{6mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentscolskip}
+%   The distance between columns
+%    \begin{macrocode}
+\newlength\commentscolskip
+\setlength\commentscolskip{6mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentscolwidth}
+%   The width of the comments column
+%    \begin{macrocode}
+\newlength\commentscolwidth
+\setlength\commentscolwidth{55.5mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentscolTheight}
+%   The height of the ``tall'' columns
+%    \begin{macrocode}
+\newlength\commentscolTheight
+\setlength\commentscolTheight{25.6mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentscolSheight}
+%   The height of the ``short'' columns
+%    \begin{macrocode}
+\newlength\commentscolSheight
+\setlength\commentscolSheight{56mm}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsOddPageSetup}
+%   The odd page structure
+%    \begin{macrocode}
+\def\commentsOddPageSetup#1#2#3{%
+  \gdef\@commeditOddLeftCols{#1}%
+  \gdef\@commeditOddMiddleCols{#2}%
+  \gdef\@commeditOddRightCols{#3}}
+\commentsOddPageSetup{0}{2}{1}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsEvenPageSetup}
+%   The even page structure
+%    \begin{macrocode}
+\def\commentsEvenPageSetup#1#2#3{%
+  \gdef\@commeditEvenLeftCols{#1}%
+  \gdef\@commeditEvenMiddleCols{#2}%
+  \gdef\@commeditEvenRightCols{#3}}
+\commentsEvenPageSetup{1}{2}{0}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsParindent}
+%   The paragraphing for comments
+%    \begin{macrocode}
+\newlength\commentsParindent
+\setlength\commentsParindent{\parindent}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsParskip}
+%   The paragraphing for comments continued
+%    \begin{macrocode}
+\newlength\commentsParskip
+\setlength\commentsParskip{\parskip}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsHook}
+%   Everything we did not think about\ldots
+%    \begin{macrocode}
+\def\commentsHook{}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+%
+%
+%\subsubsection{Gathering comments}
+%\label{sec:commentsBox}
+%
+% \begin{macro}{\@commedit@box}
+%   The box with comments
+%    \begin{macrocode}
+\newbox\@commedit@box
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\commentsBox}
+%   The box of comments
+%    \begin{macrocode}
+\def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vtop\bgroup
+  \normalsize\normalfont
+  \parindent=\commentsParindent
+  \parskip\commentsParskip
+  \commentsHook}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+% \begin{macro}{\endcommentsBox}
+% Closing the box
+%    \begin{macrocode}
+\def\endcommentsBox{\egroup}
+%    \end{macrocode}
 % 
+% \end{macro}
+%
+% \begin{macro}{\@commedit@page@box}
+%   The box to hold the page so far with comments
+%    \begin{macrocode}
+\newbox\@commedit@pagebox
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+%
+% \begin{macro}{\typesetComments}
+%   Typesetting the box so far
+%    \begin{macrocode}
+\def\typesetComments#1{\clearpage\bgroup
+  \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\relax
+  \checkoddpage\ifoddpage
+    \global\def\@commeditLeftCols{\@commeditOddLeftCols}%
+    \global\def\@commeditMiddleCols{\@commeditOddMiddleCols}%
+    \global\def\@commeditRightCols{\@commeditOddRightCols}%
+  \else
+    \global\def\@commeditLeftCols{\@commeditEvenLeftCols}%
+    \global\def\@commeditMiddleCols{\@commeditEvenMiddleCols}%
+    \global\def\@commeditRightCols{\@commeditEvenRightCols}%
+  \fi
+  \ifnum\@commeditLeftCols>0\relax
+      \@tempcnta=\@commeditLeftCols\relax
+      \loop
+        \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
+          \vsplit\@commedit@box to
+          \commentscolTheight\relax
+          \hskip\commentscolskip\relax}%
+       \advance\@tempcnta by -1\relax
+       \ifnum\@tempcnta>0\repeat      
+  \fi
+  \box\@commedit@pagebox
+  \egroup}
+%    \end{macrocode}
+%   
+% \end{macro}
 %
 %    \begin{macrocode}
 %</style>
