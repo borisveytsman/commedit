@@ -47,6 +47,18 @@ This is the introuduction for the commentaries
 
 \begin{commeditText}
   \kant[11-17]
+
+  Some equation in the comments
+  \begin{equation}
+    \label{eq:pi}
+    e^{i\pi}=-1
+  \end{equation}
+  and another one
+  \begin{equation}
+    \label{eq:sin}
+    sin^2\phi+\cos^2\phi=1
+  \end{equation}
+
 \end{commeditText}
 
 \mainmatter
@@ -60,17 +72,31 @@ This is the introuduction for the commentaries
   \kant[6]
 \end{commeditComments}
 
+
+Einstein equation
+\begin{equation}
+  \label{eq:Einstein}
+  e=mc^2
+\end{equation}
+
 \kant[6]
 
 
 \begin{commeditComments}
   \kant[2]
+
+  We can reference base equation~(\ref{eq:Einstein}) on base
+  page~(\pageref{eq:Einstein}) and commented edition
+  equations~(\ref{eq:pi}) and (\ref{eq:sin}) on the commented edition
+  page~(\pageref{eq:pi}).
+
+  \kant[7]
 \end{commeditComments}
 
 \kant[5-8]
 
 \begin{commeditComments}
-  aaaa
+  \kant[4]
 \end{commeditComments}
 \begin{commeditComments}
   \kant[8-20]
