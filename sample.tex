@@ -11,7 +11,9 @@ bottom=17mm, outer=22mm, inner=20mm, includeheadfoot=false]{geometry}
   \usepackage{kantlipsum}
   \usepackage{ragged2e}
   \usepackage{commedit}
-  \commentsHook{\RaggedRight\parskip=0pt\parindent=1em}
+  \basepageargs{width=140mm}
+  \commentsHook{\RaggedRight\parskip=0pt\parindent=1em\clubpenalty=0
+  \widowpenalty=0\relax}
 \end{commeditPreamble}
 
 \begin{commeditText}
@@ -68,7 +70,10 @@ This is the introuduction for the commentaries
 \kant[5-8]
 
 \begin{commeditComments}
-  \kant[2-20]
+  aaaa
+\end{commeditComments}
+\begin{commeditComments}
+  \kant[8-20]
 \end{commeditComments}
 
 \kant[9-20]

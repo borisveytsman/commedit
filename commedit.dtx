@@ -230,7 +230,7 @@
 % \DescribeMacro{\commentscolSheight}%
 % The lengths \cs{commentscolTheight} and \cs{commentscolSheight} are
 % the heights of ``tall'' and ``short'' comment columns (see
-% Figre~\ref{fig:commented_edition}.  By default 256\,mm and 56\,mm.
+% Figre~\ref{fig:commented_edition}.  By default 256\,mm and 58\,mm.
 %
 % \DescribeMacro{\basepageboxwidth}%
 % The width of the box with the base page is \cs{basepageboxwidth}.
@@ -259,6 +259,11 @@
 % \commentsEvenPageSetup{1}{2}{0}
 % \end{verbatim}
 %
+% \DescribeMacro{\commentsContinuationPageSetup}%
+% If comments overflow the the base edition pages, they continue on
+% \emph{continuation pages.}  The command
+% \cs{commentsContinuationPageSetup}\marg{number of columns} sets up
+% the number of columns for these pages (by default 3).
 %
 % \DescribeMacro{\commentsHook}%
 % A hook executed for all comments pages, for example
@@ -551,7 +556,7 @@
 %   The height of the ``short'' columns
 %    \begin{macrocode}
 \newlength\commentscolSheight
-\setlength\commentscolSheight{56mm}
+\setlength\commentscolSheight{58mm}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -599,6 +604,17 @@
 %   
 % \end{macro}
 %
+% \begin{macro}{\commentsContinuationPageSetup}
+%   The number of continuation pages
+%    \begin{macrocode}
+\def\commentsContinuationPageSetup#1{%
+  \gdef\@commeditContinuationCols{#1}}
+\commentsContinuationPageSetup{3}
+%    \end{macrocode}
+%   
+% \end{macro}
+%
+%
 % \begin{macro}{\commentsHook}
 %   Everything we did not think about\ldots
 %    \begin{macrocode}
@@ -624,9 +640,10 @@
 % \begin{macro}{\commentsBox}
 %   The box of comments
 %    \begin{macrocode}
-\def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vtop\bgroup
+\def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vbox\bgroup
   \normalsize\normalfont
-  \@commentsHook}
+  \@commentsHook
+  \box\@commedit@box}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -652,7 +669,7 @@
 %   Typesetting the box so far
 %    \begin{macrocode}
 \def\typesetComments#1{\clearpage\bgroup
-  \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\relax
+  \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\topskip=\z@
   \checkoddpage\ifoddpage
     \global\def\@commeditLeftCols{\@commeditOddLeftCols}%
     \global\def\@commeditMiddleCols{\@commeditOddMiddleCols}%
@@ -669,13 +686,77 @@
           \vsplit\@commedit@box to
           \commentscolTheight\relax
           \hskip\commentscolskip\relax}%
+        \global\setbox\@commedit@box=\box\@commedit@box
+       \advance\@tempcnta by -1\relax
+       \ifnum\@tempcnta>0\repeat      
+  \fi
+  \setbox\@tempboxa=\hbox{}%
+  \ifnum\@commeditMiddleCols>0\relax
+      \@tempcnta=\@commeditMiddleCols\relax
+      \loop
+        \setbox\@tempboxa=\hbox{\noindent\box\@tempboxa
+          \vsplit\@commedit@box to
+          \commentscolSheight\relax}%
+       \global\setbox\@commedit@box=\box\@commedit@box
+       \advance\@tempcnta by -1\relax        
+       \ifnum\@tempcnta>0\relax
+          \setbox\@tempboxa=\hbox{\noindent\box\@tempboxa
+            \hskip\commentscolskip\relax}%
+      \repeat
+  \fi
+  \ifx\@basepageargs\@empty\relax
+    \def\@commedit@args{page=#1}%
+  \else
+      \edef\@commedit@args{page=#1,\@basepageargs}%  
+  \fi
+  \hsize=\basepageboxwidth
+  \setbox\@tempboxa=\vbox to \commentscolTheight \bgroup
+     \hbox{\fbox{\noindent\expandafter\includegraphics\expandafter[\@commedit@args]{\BaseEditionName.pdf}}}%
+     \vfill\box\@tempboxa\egroup
+  \setbox\@commedit@pagebox=\hbox{\box\@commedit@pagebox
+    \box\@tempboxa}%
+  \ifnum\@commeditRightCols>0\relax
+      \@tempcnta=\@commeditRightCols\relax
+      \loop
+        \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
+          \hskip\commentscolskip\relax
+          \vsplit\@commedit@box to
+          \commentscolTheight\relax}%
+        \global\setbox\@commedit@box=\box\@commedit@box
        \advance\@tempcnta by -1\relax
        \ifnum\@tempcnta>0\repeat      
   \fi
   \noindent\box\@commedit@pagebox\par
-  \egroup\vfill\clearpage}
+  \global\setbox\@commedit@box=\box\@commedit@box
+  \egroup\vfill\clearpage
+  \ifdim\ht\@commedit@box>\baselineskip
+  \typesetContinuation\fi}
 %    \end{macrocode}
 %   
+% \end{macro}
+%
+% \begin{macro}{\typesetContinuation}
+%   Continuation boxes
+%    \begin{macrocode}
+\def\typesetContinuation{\clearpage\bgroup
+  \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\relax
+  \@tempcnta=\@commeditContinuationCols\relax
+  \loop
+  \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
+    \vsplit\@commedit@box to
+    \commentscolTheight\relax}%
+     \global\setbox\@commedit@box=\box\@commedit@box
+     \advance\@tempcnta by -1\relax
+     \ifnum\@tempcnta>0\relax
+        \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
+          \hskip\commentscolskip\relax}%
+   \repeat
+  \noindent\box\@commedit@pagebox\par
+  \global\setbox\@commedit@box=\box\@commedit@box
+  \egroup\vfill\clearpage
+  \ifdim\ht\@commedit@box>\baselineskip
+  \typesetContinuation\fi}
+%    \end{macrocode}
 % \end{macro}
 %
 %    \begin{macrocode}
