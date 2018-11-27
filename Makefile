@@ -63,3 +63,10 @@ archive:  all clean
 	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz \
 	--exclude '*~' --exclude '*.tgz' --exclude .git $(PACKAGE);\
 	mv $(PACKAGE).tgz $(PACKAGE);
+
+zip:  all clean
+	${MAKE} ${PACKAGE}.sty
+	${RM} *.log
+	cd .. && zip -r ${PACKAGE}.zip ${PACKAGE} \
+	-x '*/.git' -x '*/.gitignore' \
+	-x '*/.git/*' -x '*/.gitignore' \
