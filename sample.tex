@@ -1,7 +1,7 @@
 \documentclass{book}
 \usepackage[papersize={204mm,275mm}, top=17mm,
 bottom=17mm, outer=22mm, inner=20mm, includeheadfoot=false]{geometry}
-\usepackage{kantlipsum}
+\usepackage{lipsum}
 \usepackage{commedit}
 \clearpage
 \begin{commeditPreamble}{commented.tex}
@@ -22,13 +22,21 @@ bottom=17mm, outer=22mm, inner=20mm, includeheadfoot=false]{geometry}
   \date{November 2018}
   \maketitle
   
-\chapter{Introduction}
-\label{sec:intro}
+  \chapter{Introduction}
+  \label{sec:intro-commented}
 
-This is the introuduction for the commentaries
-\kant[6-8]
+  This is the introuduction for the commented edition.  Note that we
+  use \textsl{lipsum} for the base edition and \textsl{kantlipsum} for
+  the commented edition.
 
-\mainmatter
+  Some gibberish\ldots
+  
+  \kant[6-20]
+
+  \mainmatter
+
+  \chapter{First chapter}
+  \label{sec:first-commented}
 \end{commeditText}
 
 \begin{document}
@@ -41,23 +49,29 @@ This is the introuduction for the commentaries
 \chapter{Foreword}
 \label{chap:foreword}
 
+The foreword for the base edition
 
-\kant[1-5]
+\lipsum[1-5]
 
 \begin{commeditText}
-  \kant[11-17]
 
+  Now we switch back to the commented edition.
+  
   Some equation in the comments
   \begin{equation}
     \label{eq:pi}
-    e^{i\pi}=-1
+    e^{i\pi}=-1,
   \end{equation}
   and another one
   \begin{equation}
     \label{eq:sin}
-    sin^2\phi+\cos^2\phi=1
+    sin^2\phi+\cos^2\phi=1.
   \end{equation}
 
+  And more gibbersih:
+
+  \kant[5-12]
+  
 \end{commeditText}
 
 \mainmatter
@@ -65,41 +79,49 @@ This is the introuduction for the commentaries
 \chapter{Some thoughts}
 \label{chap:thoughts}
 
-
-
+Here we switch back to the base edition.  
 \begin{commeditComments}
+  Comments for the chapter~\ref{chap:thoughts} of the base edition. 
   \kant[6]
 \end{commeditComments}
 
-
-Einstein equation
+An equation for the base edition:
 \begin{equation}
   \label{eq:Einstein}
-  e=mc^2
+  e=mc^2.
 \end{equation}
 
-\kant[6]
+And pseudo-lating gibberish.
+
+\lipsum[6-12]
 
 
 \begin{commeditComments}
-  \kant[2]
-
   We can reference base equation~(\ref{eq:Einstein}) on base
   page~(\pageref{eq:Einstein}) and commented edition
   equations~(\ref{eq:pi}) and (\ref{eq:sin}) on the commented edition
   page~(\pageref{eq:pi}).
 
+  More gibberish.
+  
   \kant[7]
 \end{commeditComments}
 
-\kant[5-8]
+More gibberish for base edition.
+
+\lipsum[15-17]
 
 \begin{commeditComments}
+  Comments.
   \kant[4]
 \end{commeditComments}
+
+\lipsum[3-2]
+
 \begin{commeditComments}
+  More comments.  Note the continuation pages\ldots
   \kant[8-20]
 \end{commeditComments}
 
-\kant[9-20]
+\lipsum[9-20]
 \end{document}
