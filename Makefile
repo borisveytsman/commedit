@@ -70,3 +70,4 @@ zip:  all clean
 	cd .. && zip -r ${PACKAGE}.zip ${PACKAGE} \
 	-x '*/.git' -x '*/.gitignore' \
 	-x '*/.git/*' -x '*/.gitignore' \
+	-x '*/*.ins'
