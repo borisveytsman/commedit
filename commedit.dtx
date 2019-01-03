@@ -1,6 +1,6 @@
 % \iffalse
 %
-%% Copyright 2018, Boris Veytsman <borisv@lk.net>
+%% Copyright 2018-2019, Boris Veytsman <borisv@lk.net>
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either
 %% version 1.3 of this license or (at your option) any 
@@ -21,7 +21,7 @@
 %</gobble>
 %<style>\ProvidesPackage{commedit}
 %<*style>
-[2018/11/25 v1.00 Commented editions with LaTeX]
+[2019/01/03 v1.01 Commented editions with LaTeX]
 %    \end{macrocode}
 %</style>
 %<*gobble>
@@ -322,11 +322,13 @@
 % \end{macro}
 %
 % \begin{macro}{\@commeditout}
+% \changes{v1.01}{2018/01/03}{Added last page at the end of document}
 %   The file to write the the data to
 %    \begin{macrocode}
 \newwrite\@commeditout
 \AtEndDocument{\ifCommentedEdition\else
   \write\@commeditout{\string\end{commentsBox}}%
+  \write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
   \write\@commeditout{\string\end{document}}%
 \fi
 \closeout\@commeditout}
@@ -337,6 +339,7 @@
 %
 %
 % \begin{macro}{\@write@comments}
+% \changes{v1.01}{2018/01/03}{Moved to \cs{protected@write}}
 %   The workhorse.  Mainly from Scott Pakin's \texttt{filecontents}
 %   package and \LaTeX\ kernel.  The commments are from them.
 %    \begin{macrocode}
@@ -352,6 +355,87 @@
 \catcode`\^^L\active\let^^L\relax%
 \catcode`\^^I\active%
 \gdef\@write@comments{%
+  \let\do\@makeother\dospecials%
+%    \end{macrocode}
+%    If there are active characters in the upper half (e.g., from
+%    \texttt{inputenc} there would be confusion so we render everything
+%    harmless.
+%    \begin{macrocode}
+  \count@ 128\relax%
+  \loop%
+    \catcode\count@ 11\relax%
+    \advance\count@ \@ne%
+    \ifnum\count@<\@cclvi%
+  \repeat%
+  \edef\E{\@backslashchar end\string{\@currenvir\string}}%
+  \edef\reserved@b{%
+    \def\noexpand\reserved@b%
+         ####1\E####2\E####3\relax}%
+  \reserved@b{%
+    \ifx\relax##3\relax%
+%    \end{macrocode}
+% There was no |\end{filecontents}|
+%    \begin{macrocode}
+      \write\@commeditout{##1}%
+    \else%
+%    \end{macrocode}
+% There was a |\end{filecontents}|, so stop this time.
+%    \begin{macrocode}
+      \edef^^M{\noexpand\end{\@currenvir}}%
+      \ifx\relax##1\relax%
+      \else%
+%    \end{macrocode}
+% Text before the |\end|, write it with a warning.
+%    \begin{macrocode}
+          \@latex@warning{Writing text `##1' before %
+             \string\end{\@currenvir}\MessageBreak as last line of \@currenvir}%
+        \write\@commeditout{##1}%
+      \fi%
+      \ifx\relax##2\relax%
+      \else%
+%    \end{macrocode}
+% Text after the |\end|, ignore it with a warning.
+%    \begin{macrocode}
+         \@latex@warning{%
+           Ignoring text `##2' after \string\end{\@currenvir}}%
+      \fi%
+    \fi%
+    ^^M}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+  \catcode`\^^L\active%
+  \let\L\@undefined%
+  \def^^L{\@ifundefined L^^J^^J^^J}%
+  \catcode`\^^I\active%
+  \let\I\@undefined%
+  \def^^I{\@ifundefined I\space\space}%
+  \catcode`\^^M\active%
+  \edef^^M##1^^M{%
+    \noexpand\reserved@b##1\E\E\relax}}%
+\endgroup%
+%    \end{macrocode}
+%
+%   
+% \end{macro}
+%
+% \begin{macro}{\immediate@write@commments}
+% \changes{v1.01}{2018/01/03}{Added macro}
+% The version of \cs{@write@comments}, which does not wait till the
+% end of page
+%    \begin{macrocode}
+\begingroup%
+\@tempcnta=1
+\loop
+  \catcode\@tempcnta=12  %
+  \advance\@tempcnta\@ne %
+\ifnum\@tempcnta<32      %
+\repeat                  %
+\catcode`\*=11 %
+\catcode`\^^M\active%
+\catcode`\^^L\active\let^^L\relax%
+\catcode`\^^I\active%
+\gdef\immediate@write@comments{%
   \let\do\@makeother\dospecials%
 %    \end{macrocode}
 %    If there are active characters in the upper half (e.g., from
@@ -412,16 +496,15 @@
     \noexpand\reserved@b##1\E\E\relax}}%
 \endgroup%
 %    \end{macrocode}
-%
-%   
 % \end{macro}
 %
 % \begin{macro}{\commeditPreamble}
+% \changes{v1.01}{2018/01/03}{Moved to \cs{immediate@write@comments}}
 %   Writing the preamble
 %    \begin{macrocode}
 \def\commeditPreamble#1{\immediate\closeout\@commeditout
   \immediate\openout\@commeditout=#1
-  \@write@comments}
+  \immediate@write@comments}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -454,7 +537,7 @@
 %  We add \cs{par} at the end of each comments
 %    \begin{macrocode}
 \def\endcommeditComments{%
-  \immediate\write\@commeditout{\string\par}}
+  \write\@commeditout{\string\par}}
 %    \end{macrocode}
 %  
 %   
@@ -467,7 +550,7 @@
 %   comments. 
 %    \begin{macrocode}
 \def\commeditText{\clearpage
-  \immediate\write\@commeditout{\string\end{commentsBox}}%
+  \write\@commeditout{\string\end{commentsBox}}%
 \@write@comments}      
 %    \end{macrocode}
 %   
@@ -477,8 +560,8 @@
 %   Opening the new comments page
 %    \begin{macrocode}
 \def\endcommeditText{%
-  \immediate\write\@commeditout{\string\par}%
-    \immediate\write\@commeditout{\string\begin{commentsBox}}}
+  \write\@commeditout{\string\par}%
+    \write\@commeditout{\string\begin{commentsBox}}}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -492,17 +575,42 @@
 %   
 % \end{macro}
 %
-% We write the commands to every shipout
+% We write the commands to every shipout.  First, we need a package.
+% |atbegshi| is more powerful, but for our purpose |everyshi| is fine.
 %    \begin{macrocode}
-\RequirePackage{atbegshi}
-\AtBeginShipout{\ifCommentedEdition\else
-  \immediate\write\@commeditout{\string\end{commentsBox}}%
-\immediate\write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
-\global\advance\@commedit@base@pageno by 1\relax
-\immediate\write\@commeditout{\string\begin{commentsBox}}%
-  \fi}
+\RequirePackage{everyshi}
 %    \end{macrocode}
+% We need to patch this package, however, since we want to execute the
+% hook \emph{after} shipout!
 %
+% 
+% \begin{macro}{\@EveryShipoutEnd@Hook}
+% \changes{v1.01}{2019/01/03}{Added macro}
+% We define the hook
+%    \begin{macrocode}
+\newcommand\@EveryShipoutEnd@Hook{\ifCommentedEdition\else
+  \immediate\write\@commeditout{\string\end{commentsBox}}%
+  \immediate\write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
+  \immediate\write\@commeditout{\string\begin{commentsBox}}%
+    \global\advance\@commedit@base@pageno by 1\relax
+\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@EveryShipout@Output}
+% \changes{v1.01}{2019/01/03}{Redefined}
+% And add to the macro
+%    \begin{macrocode}
+\renewcommand{\@EveryShipout@Output}{%
+   \@EveryShipout@Hook%
+   \@EveryShipout@AtNextHook%
+      \gdef\@EveryShipout@AtNextHook{}%
+   \@EveryShipout@Org@Shipout\box\@cclv\relax
+   \@EveryShipoutEnd@Hook%
+   }
+%    \end{macrocode}
+% 
+% \end{macro}
 %
 %
 %\subsection{Typesetting commented edition}
@@ -666,10 +774,12 @@
 %
 %
 % \begin{macro}{\typesetComments}
+% \changes{v1.01}{2018/01/03}{Added \cs{vfill} to \cs{@commedit@box}}
 %   Typesetting the box so far
 %    \begin{macrocode}
 \def\typesetComments#1{\clearpage\bgroup
   \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\topskip=\z@
+  \setbox\@commedit@box=\vbox{\unvbox\@commedit@box\vfill}%
   \checkoddpage\ifoddpage
     \global\def\@commeditLeftCols{\@commeditOddLeftCols}%
     \global\def\@commeditMiddleCols{\@commeditOddMiddleCols}%
