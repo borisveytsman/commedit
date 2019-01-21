@@ -10,6 +10,7 @@ bottom=17mm, outer=22mm, inner=20mm, includeheadfoot=false]{geometry}
   bottom=17mm, outer=11mm, inner=4.5mm, includeheadfoot=false]{geometry}
   \usepackage{kantlipsum}
   \usepackage{ragged2e}
+  \usepackage{booktabs}
   \usepackage{commedit}
   \basepageargs{width=140mm}
   \commentsHook{\RaggedRight\parskip=0pt\parindent=1em\relax}
@@ -139,4 +140,47 @@ More gibberish for base edition.
 \end{commeditComments}
 
 \lipsum[9-20]
+
+\begin{commeditComments}
+  Here we add a figure.
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{vitruvian}
+    \caption{Vitruvian man}
+    \label{fig:vitruvian}
+  \end{figure}
+
+  There is no difference between starred and unstarred floats
+  \begin{table*}
+    \centering
+    \begin{tabular}{ll}
+      \toprule
+      Gnus & Gnats\\
+      \midrule
+      12 & 20\\
+      24 & 10\\
+      \bottomrule
+    \end{tabular}
+    \caption{A table}
+    \label{tab:table}
+  \end{table*}
+
+\end{commeditComments}
+
+\begin{commeditText}
+  \section{Final text}
+
+
+  Here we add a real float.  Note that it floats to the top of the
+  page.
+
+  \begin{figure}[t]
+    \centering
+    \includegraphics[width=.5\columnwidth]{vitruvian}    
+    \caption{Another vitruvian man}
+    \label{fig:vitruvian1}
+  \end{figure}
+\end{commeditText}
+
 \end{document}

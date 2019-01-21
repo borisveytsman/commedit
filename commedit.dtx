@@ -363,11 +363,11 @@
 %    \begin{macrocode}
 \newwrite\@commeditout
 \AtEndDocument{\ifCommentedEdition\else
-  \write\@commeditout{\string\end{commentsBox}}%
-  \write\@commeditout{\string\typesetComments{\the\@commedit@base@pageno}}%
-  \write\@commeditout{\string\end{document}}%
-\fi
-\closeout\@commeditout}
+  \cleardoublepage
+  \immediate\write\@commeditout{\string\end{commentsBox}}%
+  \immediate\write\@commeditout{\string\end{document}}%
+  \closeout\@commeditout
+\fi}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -586,8 +586,8 @@
 %   comments. 
 %    \begin{macrocode}
 \def\commeditText{\clearpage
-  \write\@commeditout{\string\end{commentsBox}}%
-\@write@comments}      
+  \immediate\write\@commeditout{\string\end{commentsBox}}%
+\immediate@write@comments}      
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -596,8 +596,8 @@
 %   Opening the new comments page
 %    \begin{macrocode}
 \def\endcommeditText{%
-  \write\@commeditout{\string\par}%
-    \write\@commeditout{\string\begin{commentsBox}}}
+  \immediate\write\@commeditout{\string\par}%
+   \immediate\write\@commeditout{\string\begin{commentsBox}}}
 %    \end{macrocode}
 %   
 % \end{macro}
@@ -854,11 +854,48 @@
 % 
 % \end{macro}
 %
+% \begin{macro}{\comments@xfloat}
+% \changes{v1.02}{2019/01/20}{Added macro}
+% The version of \cs{@xfloat} inside comments
+%    \begin{macrocode}
+\def\comments@xfloat#1[#2]{%
+  \@nodocument
+  \def \@captype {#1}%
+  \setbox\@tempboxb
+    \color@vbox
+      \normalcolor
+      \vbox \bgroup
+        \hsize\columnwidth
+        \@parboxrestore
+        \@floatboxreset}
+%    \end{macrocode}
+% 
+% \end{macro}
+%
+% \begin{macro}{\comments@end@float}
+% \changes{v1.02}{2019/01/20}{Added macro}
+% We do not move float to the list, but just typeset it in place.
+%    \begin{macrocode}
+\def\comments@end@float{%
+  \@endfloatbox
+  \vskip \intextsep
+  \box\@tempboxb
+  \penalty\interlinepenalty
+  \vskip\intextsep}
+%    \end{macrocode}
+% 
+% \end{macro}
+%
 % \begin{macro}{\commentsBox}
+% \changes{v1.02}{2019/01/20}{Added footnotes, floats}
 %   The box of comments
 %    \begin{macrocode}
 \def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vbox\bgroup
   \let\@footnotetext=\@commentsfootnotetext
+  \let\@dblfloat\@float
+  \let\@xfloat=\comments@xfloat
+  \let\end@float\comments@end@float
+  \let\end@dblfloat\comments@end@float
   \let\columnwidth=\commentscolwidth
   \normalsize\normalfont
   \@commentsHook
