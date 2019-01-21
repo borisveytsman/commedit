@@ -21,7 +21,7 @@
 %</gobble>
 %<style>\ProvidesPackage{commedit}
 %<*style>
-[2019/01/20 v1.02 Commented editions with LaTeX]
+[2019/01/21 v1.02 Commented editions with LaTeX]
 %    \end{macrocode}
 %</style>
 %<*gobble>
@@ -276,6 +276,13 @@
 % line since it is added, along with some technical stuff, by the
 % package itself.
 %
+% \DescribeMacro{\commentsraggedbottom}%
+% \DescribeMacro{\commentsflushbottom}%
+% The commands \cs{commentsraggedbottom} and \cs{commentsflushbottom}
+% produce either columns of comments with no stretchability, or with
+% aligned last lines.  The default is \cs{commentsraggedbottom}.  
+%
+%
 %\subsection{Commented pages}
 %\label{sec:ug_commeditComments}
 %
@@ -306,16 +313,25 @@
 % changed.  This means that a number of familiar \LaTeX\ features do
 % not work or work differently from the way one used to.
 %
-% First, on the comments pages only one column floats are allowed, and
+% \DescribeEnv{figure}%
+% \DescribeEnv{table}%
+% On the comments pages only one column floats are allowed, and
 % these actually do not float: they are output where they are
 % introduced (as if they were using \texttt{h!} specifier).
 %
-% Second, you cannot use \cs{marginpar} commands for pages with
+% \DescribeMacro{\marginpar}%
+% You cannot use \cs{marginpar} commands for pages with
 % comments.  You still can use them with the ``normal pages'',
 % however.
 %
-%  Third, all footnotes for the commented pages are printed at the end
-%  of the commented pages.
+% \DescribeMacro{\footnote}
+% All footnotes for the commented pages are printed at the end of
+% the commented pages.
+%
+% \DescribeMacro{\pagebreak}%
+% \DescribeMacro{\newpage}%
+% \DescribeMacro{\clearpage}%
+% Page breaking commands start new columns instead of new pages.  
 % 
 %
 %\StopEventually{\clearpage}
@@ -734,7 +750,7 @@
 % \end{macro}
 %
 % \begin{macro}{\commentsContinuationPageSetup}
-%   The number of continuation pages
+%   The number of continuation columns
 %    \begin{macrocode}
 \def\commentsContinuationPageSetup#1{%
   \gdef\@commeditContinuationCols{#1}}
@@ -743,6 +759,47 @@
 %   
 % \end{macro}
 %
+% \begin{macro}{\@commentstexttop}
+% \changes{v1.02}{2019/01/21}{Added macro}
+% Top of the column
+%    \begin{macrocode}
+\let\@commentstexttop\relax
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@commentstextbottom}
+% \changes{v1.02}{2019/01/21}{Added macro}
+% Top of the column
+%    \begin{macrocode}
+\let\@commentstextbottom\relax
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\commentsraggedbottom}
+% \changes{v1.02}{2019/01/21}{Added macro}
+% Ragged bottom columns (the default)
+\def\commentsraggedbottom{%
+  \def\@commentstextbottom{\vskip \z@ \@plus.0001fil}%
+  \let\@commentstexttop\relax}
+\commentsraggedbottom
+% \end{macro}
+%
+% \begin{macro}{\commentsflushbottom}
+% \changes{v1.02}{2019/01/21}{Added macro}
+% Flushed bottom columns 
+\def\commentsflushbottom{%
+  \let\@commentstextbottom\relax
+  \let\@commentstexttop\relax}
+% \end{macro}
+%
+% \begin{macro}{\@tempboxb}
+% \changes{v1.02}{2019/01/21}{Added macro}
+% A temp box
+%    \begin{macrocode}
+\newbox\@tempboxb
+%    \end{macrocode}
+% 
+% \end{macro}
 %
 % \begin{macro}{\commentsHook}
 %   Everything we did not think about\ldots
@@ -775,17 +832,6 @@
 % 
 % \end{macro}
 %
-% \begin{macro}{\@commentsfootnoterule}
-% \changes{v1.02}{2019/01/20}{Added macro}
-% Footnote rule for comments
-%    \begin{macrocode}
-\def\@commentsfootnoterule{%
-  \kern-3\p@
-  \hrule\@width.4\commentscolwidth
-  \kern2.6\p@}
-%    \end{macrocode}
-% 
-% \end{macro}
 %
 % \begin{macro}{\@commentsfootnotetext}
 % \changes{v1.02}{2019/01/20}{Added macro}
@@ -813,6 +859,7 @@
 %    \begin{macrocode}
 \def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vbox\bgroup
   \let\@footnotetext=\@commentsfootnotetext
+  \let\columnwidth=\commentscolwidth
   \normalsize\normalfont
   \@commentsHook
   \unvbox\@commedit@box}
@@ -843,13 +890,14 @@
 %   Typesetting the box of comments
 %    \begin{macrocode}
 \def\typesetComments#1{\clearpage\bgroup
+  \let\columnwidth=\commentscolwidth
   \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\topskip=\z@
   \ifvoid\@commentsfootins\else
   \setbox\@commedit@box=\vbox{\unvbox\@commedit@box
     \vskip \skip\footins
     \color@begingroup
     \normalcolor
-    \@commentsfootnoterule
+    \footnoterule
     \unvbox \@commentsfootins
     \color@endgroup}%
   \fi
@@ -866,9 +914,14 @@
   \ifnum\@commeditLeftCols>0\relax
       \@tempcnta=\@commeditLeftCols\relax
       \loop
+        \setbox\@tempboxb=\vsplit\@commedit@box to
+        \commentscolTheight\relax
+        \setbox\@tempboxb=\vbox to \commentscolTheight{%
+          \@commentstexttop
+          \unvbox\@tempboxb
+          \@commentstextbottom}%
         \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
-          \vsplit\@commedit@box to
-          \commentscolTheight\relax
+          \box\@tempboxb
           \hskip\commentscolskip\relax}%
         \global\setbox\@commedit@box=\box\@commedit@box
        \advance\@tempcnta by -1\relax
@@ -878,9 +931,14 @@
   \ifnum\@commeditMiddleCols>0\relax
       \@tempcnta=\@commeditMiddleCols\relax
       \loop
+        \setbox\@tempboxb=\vsplit\@commedit@box to
+        \commentscolSheight\relax
+        \setbox\@tempboxb=\vbox to \commentscolSheight{%
+          \@commentstexttop
+          \unvbox\@tempboxb
+          \@commentstextbottom}%
         \setbox\@tempboxa=\hbox{\noindent\box\@tempboxa
-          \vsplit\@commedit@box to
-          \commentscolSheight\relax}%
+          \box\@tempboxb}%
        \global\setbox\@commedit@box=\box\@commedit@box
        \advance\@tempcnta by -1\relax        
        \ifnum\@tempcnta>0\relax
@@ -902,10 +960,15 @@
   \ifnum\@commeditRightCols>0\relax
       \@tempcnta=\@commeditRightCols\relax
       \loop
+        \setbox\@tempboxb=\vsplit\@commedit@box to
+        \commentscolTheight\relax
+        \setbox\@tempboxb=\vbox to \commentscolTheight{%
+          \@commentstexttop
+          \unvbox\@tempboxb
+          \@commentstextbottom}%
         \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
           \hskip\commentscolskip\relax
-          \vsplit\@commedit@box to
-          \commentscolTheight\relax}%
+          \box\@tempboxb}%
         \global\setbox\@commedit@box=\box\@commedit@box
        \advance\@tempcnta by -1\relax
        \ifnum\@tempcnta>0\repeat      
@@ -926,9 +989,14 @@
   \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\relax
   \@tempcnta=\@commeditContinuationCols\relax
   \loop
-  \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
-    \vsplit\@commedit@box to
-    \commentscolTheight\relax}%
+    \setbox\@tempboxb=\vsplit\@commedit@box to
+    \commentscolTheight\relax
+    \setbox\@tempboxb=\vbox to \commentscolTheight{%
+      \@commentstexttop
+      \unvbox\@tempboxb
+      \@commentstextbottom}%
+    \setbox\@commedit@pagebox=\hbox{\noindent\box\@commedit@pagebox
+      \box\@tempboxb}%
      \global\setbox\@commedit@box=\box\@commedit@box
      \advance\@tempcnta by -1\relax
      \ifnum\@tempcnta>0\relax
