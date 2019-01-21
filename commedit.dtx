@@ -21,7 +21,7 @@
 %</gobble>
 %<style>\ProvidesPackage{commedit}
 %<*style>
-[2019/01/03 v1.01 Commented editions with LaTeX]
+[2019/01/20 v1.02 Commented editions with LaTeX]
 %    \end{macrocode}
 %</style>
 %<*gobble>
@@ -298,6 +298,26 @@
 % into the base edition.  
 %
 %
+%
+%\subsection{Floats and  other \TeX nicalities}
+%\label{sec:floats}
+%
+% In the commented edition the normal \LaTeX\ output routine is
+% changed.  This means that a number of familiar \LaTeX\ features do
+% not work or work differently from the way one used to.
+%
+% First, on the comments pages only one column floats are allowed, and
+% these actually do not float: they are output where they are
+% introduced (as if they were using \texttt{h!} specifier).
+%
+% Second, you cannot use \cs{marginpar} commands for pages with
+% comments.  You still can use them with the ``normal pages'',
+% however.
+%
+%  Third, all footnotes for the commented pages are printed at the end
+%  of the commented pages.
+% 
+%
 %\StopEventually{\clearpage}
 %
 % \clearpage
@@ -322,7 +342,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@commeditout}
-% \changes{v1.01}{2018/01/03}{Added last page at the end of document}
+% \changes{v1.01}{2019/01/03}{Added last page at the end of document}
 %   The file to write the the data to
 %    \begin{macrocode}
 \newwrite\@commeditout
@@ -339,7 +359,7 @@
 %
 %
 % \begin{macro}{\@write@comments}
-% \changes{v1.01}{2018/01/03}{Moved to \cs{protected@write}}
+% \changes{v1.01}{2019/01/03}{Moved to \cs{protected@write}}
 %   The workhorse.  Mainly from Scott Pakin's \texttt{filecontents}
 %   package and \LaTeX\ kernel.  The commments are from them.
 %    \begin{macrocode}
@@ -420,7 +440,7 @@
 % \end{macro}
 %
 % \begin{macro}{\immediate@write@commments}
-% \changes{v1.01}{2018/01/03}{Added macro}
+% \changes{v1.01}{2019/01/03}{Added macro}
 % The version of \cs{@write@comments}, which does not wait till the
 % end of page
 %    \begin{macrocode}
@@ -499,7 +519,7 @@
 % \end{macro}
 %
 % \begin{macro}{\commeditPreamble}
-% \changes{v1.01}{2018/01/03}{Moved to \cs{immediate@write@comments}}
+% \changes{v1.01}{2019/01/03}{Moved to \cs{immediate@write@comments}}
 %   Writing the preamble
 %    \begin{macrocode}
 \def\commeditPreamble#1{\immediate\closeout\@commeditout
@@ -632,6 +652,7 @@
     \fi}
 %    \end{macrocode}
 %
+% 
 %
 % \begin{macro}{\commentscolskip}
 %   The distance between columns
@@ -745,10 +766,53 @@
 %   
 % \end{macro}
 %
+% \begin{macro}{\@commentsfootins}
+% \changes{v1.02}{2019/01/20}{Added macro}
+% The box for footnotes in comments
+%    \begin{macrocode}
+\newbox\@commentsfootins
+%    \end{macrocode}
+% 
+% \end{macro}
+%
+% \begin{macro}{\@commentsfootnoterule}
+% \changes{v1.02}{2019/01/20}{Added macro}
+% Footnote rule for comments
+%    \begin{macrocode}
+\def\@commentsfootnoterule{%
+  \kern-3\p@
+  \hrule\@width.4\commentscolwidth
+  \kern2.6\p@}
+%    \end{macrocode}
+% 
+% \end{macro}
+%
+% \begin{macro}{\@commentsfootnotetext}
+% \changes{v1.02}{2019/01/20}{Added macro}
+% The version of \cs{footnotetext} for comments
+%    \begin{macrocode}
+\long\def\@commentsfootnotetext#1{%
+  \global\setbox\@commentsfootins\vbox{%
+    \unvbox\@commentsfootins
+    \reset@font\footnotesize
+    \hsize\commentscolwidth
+    \@parboxrestore
+    \protected@edef\@currentlabel{%
+      \csname p@footnote\endcsname\@thefnmark
+    }%
+    \color@begingroup
+    \@makefntext{%
+      \rule\z@\footnotesep\ignorespaces#1\@finalstrut\strutbox}%
+    \color@endgroup}}
+%    \end{macrocode}
+% 
+% \end{macro}
+%
 % \begin{macro}{\commentsBox}
 %   The box of comments
 %    \begin{macrocode}
 \def\commentsBox{\hsize=\commentscolwidth\global\setbox\@commedit@box=\vbox\bgroup
+  \let\@footnotetext=\@commentsfootnotetext
   \normalsize\normalfont
   \@commentsHook
   \unvbox\@commedit@box}
@@ -774,11 +838,21 @@
 %
 %
 % \begin{macro}{\typesetComments}
-% \changes{v1.01}{2018/01/03}{Added \cs{vfill} to \cs{@commedit@box}}
-%   Typesetting the box so far
+% \changes{v1.01}{2019/01/03}{Added \cs{vfill} to \cs{@commedit@box}}
+% \changes{v1.02}{2019/01/20}{Added footnotes to the end of the box}
+%   Typesetting the box of comments
 %    \begin{macrocode}
 \def\typesetComments#1{\clearpage\bgroup
   \setbox\@commedit@pagebox=\hbox{}\splittopskip=\z@\topskip=\z@
+  \ifvoid\@commentsfootins\else
+  \setbox\@commedit@box=\vbox{\unvbox\@commedit@box
+    \vskip \skip\footins
+    \color@begingroup
+    \normalcolor
+    \@commentsfootnoterule
+    \unvbox \@commentsfootins
+    \color@endgroup}%
+  \fi
   \setbox\@commedit@box=\vbox{\unvbox\@commedit@box\vfill}%
   \checkoddpage\ifoddpage
     \global\def\@commeditLeftCols{\@commeditOddLeftCols}%

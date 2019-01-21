@@ -29,7 +29,7 @@ bottom=17mm, outer=22mm, inner=20mm, includeheadfoot=false]{geometry}
   use \textsl{lipsum} for the base edition and \textsl{kantlipsum} for
   the commented edition.
 
-  Some gibberish\ldots
+  Some gibberish\footnote{We can use footnotes here.}\ldots
   
   \kant[6-20]
 
@@ -55,9 +55,9 @@ The foreword for the base edition
 
 \begin{commeditText}
 
-  Now we switch back to the commented edition.
+  Now we switch back to the commented edition\footnote{A footnote}.
   
-  Some equation in the comments
+  Some equation in the text.
   \begin{equation}
     \label{eq:pi}
     e^{i\pi}=-1,
@@ -68,7 +68,7 @@ The foreword for the base edition
     sin^2\phi+\cos^2\phi=1.
   \end{equation}
 
-  And more gibbersih:
+  And more gibberish:
 
   \kant[5-12]
   
@@ -81,7 +81,11 @@ The foreword for the base edition
 
 Here we switch back to the base edition.  
 \begin{commeditComments}
-  Comments for the chapter~\ref{chap:thoughts} of the base edition. 
+  Comments for the chapter~\ref{chap:thoughts} of the base
+  edition\footnote{A footnote}.
+  \begin{equation}
+    e=mc^2
+  \end{equation}
   \kant[6]
 \end{commeditComments}
 
@@ -102,7 +106,7 @@ And pseudo-lating gibberish.
   equations~(\ref{eq:pi}) and (\ref{eq:sin}) on the commented edition
   page~(\pageref{eq:pi}).
 
-  More gibberish.
+  More gibberish\footnote{A footnote for the comments.}.
   
   \kant[7]
 \end{commeditComments}
