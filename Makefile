@@ -61,8 +61,9 @@ distclean veryclean: clean
 #
 archive:  all clean
 	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz \
-	--exclude '*~' --exclude '*.tgz' --exclude .git $(PACKAGE);\
-	mv $(PACKAGE).tgz $(PACKAGE);
+	--exclude '*~' --exclude '*.tgz' --exclude .git \
+	--exclude .gitignore $(PACKAGE) ;\
+	mv ../$(PACKAGE).tgz $(PACKAGE);
 
 zip:  all clean
 	${MAKE} ${PACKAGE}.sty
