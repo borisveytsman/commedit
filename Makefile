@@ -63,7 +63,7 @@ archive:  all clean
 	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz \
 	--exclude '*~' --exclude '*.tgz' --exclude .git \
 	--exclude .gitignore $(PACKAGE) ;\
-	mv ../$(PACKAGE).tgz $(PACKAGE);
+	mv ../$(PACKAGE).tgz .;
 
 zip:  all clean
 	${MAKE} ${PACKAGE}.sty
